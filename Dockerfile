@@ -7,8 +7,9 @@
 ARG UBUNTU_SHA=sha256:e3f92abc0967a6c19d0dfa2d55838833e947b9d74edbcb0113e48535ad4be12a
 
 # Hardware Versions
-ARG CUDA_VERSION=12.8
-ARG ROCM_VERSION=6.4
+ARG CUDA_VERSION=12.8.1
+ARG ROCM_VERSION=6.4.2
+ARG AMDGPU_VERSION=6.4.60402
 
 # ==============================================================================
 # STAGE 1: BUILDER
@@ -17,6 +18,7 @@ FROM ubuntu:noble@${UBUNTU_SHA} AS builder
 
 ARG CUDA_VERSION
 ARG ROCM_VERSION
+ARG AMDGPU_VERSION
 ARG MODE=cpu
 
 # 1. VERSION CONFIGURATION
@@ -56,15 +58,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         dpkg -i cuda-keyring_1.1-1_all.deb; \
         apt-get update && apt-get install -y --no-install-recommends cuda-toolkit-12-8; \
     elif [ "$MODE" = "7800xt" ]; then \
-        apt-get install -y --no-install-recommends ca-certificates curl gnupg2; \
-        curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -; \
-        printf "deb [arch=amd64] https://repo.radeon.com/rocm/apt/$ROCM_VERSION/ noble main" | tee /etc/apt/sources.list.d/rocm.list; \
-        printf "deb [arch=amd64] https://repo.radeon.com/amdgpu/$ROCM_VERSION/ubuntu noble main" | tee /etc/apt/sources.list.d/amdgpu.list; \
-        apt-get update && apt-get install -y --no-install-recommends \
-            libelf1 \
-            rocm-dev \
-            rocm-libs \
-            ninja-build; \
+        apt-get install -y --no-install-recommends gnupg2 software-properties-common; \
+        wget https://repo.radeon.com/amdgpu-install/${ROCM_VERSION}/ubuntu/noble/amdgpu-install_${AMDGPU_VERSION}-1_all.deb; \
+        apt install -y ./*.deb; \
+        amdgpu-install --usecase=rocm -y && rm *.deb; \
     fi
 
 # 3. Create Virtual Environment
