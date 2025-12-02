@@ -3,16 +3,18 @@ FROM ubuntu:noble@sha256:e3f92abc0967a6c19d0dfa2d55838833e947b9d74edbcb0113e4853
 ARG MODE=cpu
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PIP_BREAK_SYSTEM_PACKAGES=1
-
-ARG CUDA_VERSION=12.8.1
-ARG ROCM_VERSION=6.4.2
-ARG AMDGPU_VERSION=6.4.60402
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
+    # Box2D
     swig \
     && rm -rf /var/lib/apt/lists/*
+
+ARG CUDA_VERSION=12.8.1
+ARG CUDNN_VERSION=9
+
+ARG ROCM_VERSION=6.4.2
+ARG AMDGPU_VERSION=6.4.60402
 
 RUN if [ "$MODE" = "cuda" ] || [ "$MODE" = "7800xt" ]; then \
         apt-get update && apt-get install -y --no-install-recommends \
@@ -20,10 +22,11 @@ RUN if [ "$MODE" = "cuda" ] || [ "$MODE" = "7800xt" ]; then \
             wget; \
     fi \
     && if [ "$MODE" = "cuda" ]; then \
-        CUDA_TAG=$(echo "$CUDA_VERSION" | cut -d. -f1,2 | tr -d '.'); \
+        TOOLKIT_TAG=$(echo "$CUDA_VERSION" | cut -d. -f1,2 | tr -d '.' '-'); \
+        CUDA_MAJOR_VERSION=$(echo "$CUDA_VERSION" | cut -d. -f1); \
         wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb; \
         dpkg -i cuda-keyring_1.1-1_all.deb; \
-        apt-get update && apt-get install -y --no-install-recommends cuda-toolkit-${CUDA_TAG}; \
+        apt-get update && apt-get install -y --no-install-recommends cuda-toolkit-${TOOLKIT_TAG} cudnn${CUDNN_VERSION}-cuda-${CUDA_MAJOR_VERSION}; \
     elif [ "$MODE" = "7800xt" ]; then \
         wget --no-check-certificate https://repo.radeon.com/amdgpu-install/${ROCM_VERSION}/ubuntu/noble/amdgpu-install_${AMDGPU_VERSION}-1_all.deb; \
         apt-get install -y ./amdgpu-install_${AMDGPU_VERSION}-1_all.deb; \
@@ -31,6 +34,8 @@ RUN if [ "$MODE" = "cuda" ] || [ "$MODE" = "7800xt" ]; then \
         rm amdgpu-install_${AMDGPU_VERSION}-1_all.deb; \
     fi \
     && rm -rf /var/lib/apt/lists/*
+
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 ARG TORCH_VERSION=2.9.1
 ARG TORCHVISION_VERSION=0.24.1
