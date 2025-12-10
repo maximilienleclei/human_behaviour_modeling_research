@@ -8,7 +8,8 @@ from .models import AppState, Task, TaskState
 from .config import get_default_environments
 from .persistence import StateManager
 from .scheduler import TaskScheduler
-from .gui import OrchestratorGUI
+from .tui import OrchestratorTUI
+from .api import OrchestratorAPI
 
 
 class Orchestrator:
@@ -42,95 +43,24 @@ class Orchestrator:
         # Reconnect to running tasks
         self.scheduler.reconnect_running_tasks()
 
-        # Create GUI
-        self.gui = OrchestratorGUI(
+        # Create API
+        self.api = OrchestratorAPI(self.app_state, self.scheduler)
+
+        # Create TUI
+        self.tui = OrchestratorTUI(
             app_state=self.app_state,
             message_queue=self.message_queue,
-            load_tasks_callback=self.load_tasks,
-            approve_callback=self.approve_tasks,
-            clear_unapproved_callback=self.clear_unapproved,
-            remove_selected_callback=self.remove_tasks,
-            remove_all_done_callback=self.remove_all_done,
-            rerun_callback=self.rerun_tasks,
-            set_concurrency_callback=self.set_concurrency,
-            kill_task_callback=self.kill_task
+            api=self.api
         )
 
         # Register cleanup handler
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def load_tasks(self, environment: str, filename: str):
-        """Load tasks from a file."""
-        try:
-            with open(filename, 'r') as f:
-                lines = f.readlines()
-
-            # Create tasks from lines
-            for line in lines:
-                line = line.strip()
-                if line:  # Skip empty lines
-                    task = Task.create(command=line, environment=environment)
-                    self.app_state.add_task(task)
-
-            print(f"Loaded {len(lines)} tasks from {filename}")
-
-        except Exception as e:
-            print(f"Error loading tasks: {e}")
-
-    def approve_tasks(self, tasks):
-        """Approve selected tasks."""
-        for task in tasks:
-            if task.state == TaskState.UNAPPROVED:
-                task.state = TaskState.PENDING
-
-    def clear_unapproved(self, environment: str):
-        """Clear all unapproved tasks."""
-        tasks = self.app_state.get_tasks(environment)
-        to_remove = [t for t in tasks if t.state == TaskState.UNAPPROVED]
-
-        for task in to_remove:
-            self.app_state.remove_task(task)
-
-    def remove_tasks(self, tasks):
-        """Remove selected tasks."""
-        for task in tasks:
-            self.app_state.remove_task(task)
-
-    def remove_all_done(self, environment: str):
-        """Remove all completed/failed/killed tasks."""
-        tasks = self.app_state.get_tasks(environment)
-        done_states = [TaskState.COMPLETED, TaskState.FAILED, TaskState.KILLED]
-        to_remove = [t for t in tasks if t.state in done_states]
-
-        for task in to_remove:
-            self.app_state.remove_task(task)
-
-    def rerun_tasks(self, tasks):
-        """Reset tasks to pending state."""
-        for task in tasks:
-            if task.state in [TaskState.COMPLETED, TaskState.FAILED, TaskState.KILLED]:
-                task.state = TaskState.PENDING
-                task.tmux_session = None
-                task.start_time = None
-                task.end_time = None
-                task.exit_code = None
-                task.output_buffer = []
-
-    def set_concurrency(self, environment: str, limit: int):
-        """Set concurrency limit for an environment."""
-        env = self.app_state.environments.get(environment)
-        if env:
-            env.concurrency_limit = limit
-
-    def kill_task(self, task: Task):
-        """Kill a running task."""
-        self.scheduler.kill_task(task)
-
     def run(self):
         """Run the orchestrator."""
         try:
-            self.gui.run()
+            self.tui.run()
         finally:
             self.cleanup()
 
