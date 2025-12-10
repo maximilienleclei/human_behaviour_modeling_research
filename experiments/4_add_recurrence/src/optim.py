@@ -22,7 +22,6 @@ from .models import (
     RecurrentMLPReservoir,
     RecurrentMLPTrainable,
 )
-from .utils import save_results
 
 
 def evaluate_progression_recurrent(
@@ -163,6 +162,7 @@ def deeplearn_recurrent(
     metadata: dict | None = None,
     track_progression: bool = True,
     ckpt_and_behav_eval_interval_seconds: int | None = None,
+    logger: any = None,
 ) -> tuple[list[float], list[float]]:
     """Deep Learning (SGD) optimization for recurrent models."""
     model = model_class(input_size, exp_config.hidden_size, output_size).to(
@@ -360,17 +360,14 @@ def deeplearn_recurrent(
                 f"Optim Loss={avg_loss:.4f}, Test Loss={test_loss:.4f}, F1={f1:.4f}"
             )
 
-            # Save results
-            save_results(
-                env_name,
-                method_name,
-                {
-                    "loss": loss_history,
-                    "test_loss": test_loss_history,
-                    "f1": f1_history,
-                },
-                subject,
-            )
+            # Log to database (replaces large JSON saving)
+            if logger is not None:
+                logger.log_progress(
+                    epoch=epoch,
+                    train_loss=avg_loss,
+                    test_loss=test_loss,
+                    f1_score=f1,
+                )
 
         # Checkpoint and behaviour evaluation combined
         if elapsed - last_ckpt_eval_time >= ckpt_and_behav_eval_interval_seconds:
@@ -403,6 +400,17 @@ def deeplearn_recurrent(
                 print(
                     f"    Mean % diff from human: {mean_pct_diff:+.2f}% ± {std_pct_diff:.2f}%"
                 )
+
+                # Log behavioral metrics to database
+                if logger is not None:
+                    logger.log_progress(
+                        epoch=epoch,
+                        train_loss=avg_loss if 'avg_loss' in locals() else None,
+                        test_loss=test_loss,
+                        f1_score=f1,
+                        mean_pct_diff=mean_pct_diff,
+                        std_pct_diff=std_pct_diff,
+                    )
 
             # Save checkpoint
             checkpoint_data: dict = {
@@ -460,6 +468,7 @@ def neuroevolve_recurrent(
     metadata: dict | None = None,
     track_progression: bool = True,
     ckpt_and_behav_eval_interval_seconds: int | None = None,
+    logger: any = None,
 ) -> tuple[list[float], list[float]]:
     """Neuroevolution optimization for recurrent models with batched GPU operations."""
     if metadata is None or "optim_episode_boundaries" not in metadata:
@@ -600,17 +609,14 @@ def neuroevolve_recurrent(
                 f"Best Fitness={best_fitness:.4f}, Test Loss={test_loss:.4f}"
             )
 
-            # Save results
-            save_results(
-                env_name,
-                method_name,
-                {
-                    "fitness": fitness_history,
-                    "test_loss": test_loss_history,
-                    "f1": f1_history,
-                },
-                subject,
-            )
+            # Log to database (replaces large JSON saving)
+            if logger is not None:
+                logger.log_progress(
+                    epoch=generation,
+                    best_fitness=best_fitness,
+                    test_loss=test_loss,
+                    f1_score=f1,
+                )
 
         # Checkpoint and behaviour evaluation
         if elapsed - last_ckpt_eval_time >= ckpt_and_behav_eval_interval_seconds:
@@ -646,6 +652,17 @@ def neuroevolve_recurrent(
                 print(
                     f"    Mean % diff from human: {mean_pct_diff:+.2f}% ± {std_pct_diff:.2f}%"
                 )
+
+                # Log behavioral metrics to database
+                if logger is not None:
+                    logger.log_progress(
+                        epoch=generation,
+                        best_fitness=best_fitness if 'best_fitness' in locals() else None,
+                        test_loss=test_loss,
+                        f1_score=f1,
+                        mean_pct_diff=mean_pct_diff,
+                        std_pct_diff=std_pct_diff,
+                    )
 
             # Save checkpoint
             checkpoint_data: dict = {
@@ -699,6 +716,7 @@ def neuroevolve_dynamic(
     subject: str = "sub01",
     track_progression: bool = True,
     ckpt_and_behav_eval_interval_seconds: int | None = None,
+    logger: any = None,
 ) -> tuple[list[float], list[float]]:
     """Neuroevolution optimization for dynamic complexity networks.
 
@@ -798,17 +816,14 @@ def neuroevolve_dynamic(
                 f"Best Fitness={best_fitness:.4f}, Test Loss={test_loss:.4f}"
             )
 
-            # Save results
-            save_results(
-                env_name,
-                method_name,
-                {
-                    "fitness": fitness_history,
-                    "test_loss": test_loss_history,
-                    "f1": f1_history,
-                },
-                subject,
-            )
+            # Log to database (replaces large JSON saving)
+            if logger is not None:
+                logger.log_progress(
+                    epoch=generation,
+                    best_fitness=best_fitness,
+                    test_loss=test_loss,
+                    f1_score=0.0,
+                )
 
         generation += 1
 

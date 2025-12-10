@@ -23,6 +23,13 @@ from src.models import RecurrentMLPReservoir, RecurrentMLPTrainable
 from src.optim import deeplearn_recurrent, neuroevolve_recurrent, neuroevolve_dynamic
 from src.utils import set_random_seeds
 
+# Add tracking system to path
+TRACKING_DIR = Path(__file__).parent.parent / "tracking"
+sys.path.insert(0, str(TRACKING_DIR))
+
+from database import ExperimentDB
+from logger import ExperimentLogger
+
 
 class NumpyEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles numpy types."""
@@ -65,6 +72,7 @@ def run_single_method(
     exp_config: ExperimentConfig,
     metadata: dict,
     subject: str = "sub01",
+    logger: ExperimentLogger | None = None,
 ) -> None:
     """Run a single optimization method."""
     # Append CL variant to method name
@@ -99,6 +107,7 @@ def run_single_method(
             model_class,
             subject,
             metadata,
+            logger=logger,
         )
     elif method_config["type"] == "ne":
         # Neuroevolution with recurrent models
@@ -117,6 +126,7 @@ def run_single_method(
             model_type,
             subject,
             metadata,
+            logger=logger,
         )
     elif method_config["type"] == "ne_dynamic":
         # Neuroevolution with dynamic complexity networks
@@ -131,6 +141,7 @@ def run_single_method(
             env_name,
             method_name_full,
             subject,
+            logger=logger,
         )
     else:
         raise ValueError(f"Unknown method type: {method_config['type']}")
@@ -246,22 +257,40 @@ def main() -> None:
     input_size: int = optim_obs.shape[1]
     output_size: int = action_dim
 
-    # Run single method
-    run_single_method(
-        env_name,
-        args.method,
-        method_dict[args.method],
-        args.use_cl_info,
-        optim_obs,
-        optim_act,
-        test_obs,
-        test_act,
-        input_size,
-        output_size,
-        exp_config,
-        metadata,
-        args.subject,
+    # Initialize tracking database and logger
+    db_path = Path(__file__).parent.parent / "tracking.db"
+    db = ExperimentDB(db_path)
+
+    logger = ExperimentLogger(
+        db=db,
+        experiment_number=4,
+        dataset=env_name,
+        method=args.method,
+        subject=args.subject,
+        use_cl_info=args.use_cl_info,
+        seed=exp_config.seed,
+        config=exp_config,
+        gpu_id=args.gpu,
     )
+
+    # Run single method with logger
+    with logger:
+        run_single_method(
+            env_name,
+            args.method,
+            method_dict[args.method],
+            args.use_cl_info,
+            optim_obs,
+            optim_act,
+            test_obs,
+            test_act,
+            input_size,
+            output_size,
+            exp_config,
+            metadata,
+            args.subject,
+            logger=logger,
+        )
 
     print("\n" + "=" * 60)
     print(f"{args.method} Complete!")
