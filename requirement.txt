@@ -1,0 +1,9 @@
+numpy
+scikit-learn
+matplotlib
+datasets
+einops
+jaxtyping
+beartype
+ordered_set
+gymnasium[classic-control,box2d]
