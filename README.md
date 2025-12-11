@@ -1,12 +1,10 @@
 # Human Behaviour Modeling Research
 
-A research platform for comparing gradient-based and evolutionary training methods for behavioral cloning from human demonstrations in classic control environments.
+A research platform where we compare gradient-based and evolutionary neural network optimization methods for behavioral cloning from human demonstrations in classic control environments.
 
 ## Overview
 
 This codebase implements a comprehensive experimentation framework to investigate how different neural network training approaches (SGD, genetic algorithms, evolution strategies) perform when learning to imitate human behavior in reinforcement learning environments (CartPole, MountainCar, Acrobot, LunarLander).
-
-**Key Research Question:** How do gradient-based methods compare to evolutionary methods for learning human behavioral policies?
 
 ## Quick Start
 
