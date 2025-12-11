@@ -66,17 +66,13 @@ human_behaviour_modeling_research/
 
 ## Documentation
 
-### Getting Started
-- **[docs/README.md](docs/README.md)** - Documentation index (start here!)
-- **[docs/USAGE_GUIDE.md](docs/USAGE_GUIDE.md)** - Complete command reference and workflows
-- **[docs/NAVIGATION.md](docs/NAVIGATION.md)** - Quick file lookup guide
+📖 **[Complete Documentation Index](docs/README.md)** - Start here for a guided tour of all documentation
 
-### Understanding the System
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System design and architectural overview
-- **[platform/README.md](platform/README.md)** - Platform-specific documentation
-
-### Current Work
-- **[docs/STATUS.md](docs/STATUS.md)** - Implementation status, known issues, next steps
+**Quick Links:**
+- New to the project? → [Architecture Guide](docs/ARCHITECTURE.md)
+- Running experiments? → [Usage Guide](docs/USAGE_GUIDE.md)
+- Need to find code? → [Navigation Guide](docs/NAVIGATION.md)
+- Current status? → [Status & Next Steps](docs/STATUS.md)
 
 ## Prerequisites
 
@@ -176,12 +172,3 @@ python experiments/cli/query_results.py --experiment 5 --summary
 - ⬜ Comprehensive testing suite
 
 See [docs/STATUS.md](docs/STATUS.md) for detailed status and next steps.
-
----
-
-**Quick Links:**
-- 📖 [Full Documentation](docs/README.md)
-- 🏗️ [Architecture Guide](docs/ARCHITECTURE.md)
-- 📚 [Usage Guide](docs/USAGE_GUIDE.md)
-- 🗺️ [Navigation Guide](docs/NAVIGATION.md)
-- 📊 [Current Status](docs/STATUS.md)
