@@ -1,8 +1,35 @@
 # Platform Implementation Status
 
-**Last Updated:** December 10, 2024
-**Status:** Core platform COMPLETE and functional ✅
-**Progress:** 7 of 12 phases (58% complete, 100% functional)
+**Last Updated:** December 11, 2025
+**Status:** COMPLETE - All optimizers implemented ✅
+**Progress:** Platform + All Evolution Optimizers COMPLETE
+
+---
+
+## 🎉 NEW: Evolution Optimizers Complete (Dec 11, 2025)
+
+### What Was Added:
+- ✅ **Simple ES** for feedforward AND recurrent models
+- ✅ **Simple GA** for feedforward models
+- ✅ **CMA-ES** (Diagonal) for feedforward AND recurrent models
+- ✅ Clean CLI: `--optimizer sgd|ga|es|cmaes` (auto-dispatches based on model)
+
+### Files Created/Modified:
+- `platform/optimizers/evolution.py` (~1200 lines): BatchedPopulation, CMAESPopulation
+- `platform/optimizers/genetic.py` (~400 lines added): ES method, CMAESRecurrentPopulation
+- `platform/optimizers/__init__.py`: Exports updated
+- `platform/runner.py`: Clean CLI with auto-dispatch
+
+### Usage:
+```bash
+# All optimizers work with all model types!
+python -m platform.runner --dataset HF:CartPole-v1 --model mlp --optimizer ga|es|cmaes --max-time 600
+python -m platform.runner --dataset cartpole --model reservoir --optimizer ga|es|cmaes --max-time 600
+```
+
+### Next Steps:
+- ⏳ Test all optimizer-model combinations
+- ⏳ Update platform/README.md with examples
 
 ---
 

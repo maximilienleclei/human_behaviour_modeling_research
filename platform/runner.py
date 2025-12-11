@@ -14,8 +14,10 @@ from platform import config
 from platform.config import ENV_CONFIGS, RESULTS_DIR, set_device
 from platform.data.loaders import load_human_data, load_cartpole_data, load_lunarlander_data
 from platform.models import RecurrentMLPReservoir, RecurrentMLPTrainable
+from platform.models.feedforward import MLP
 from platform.optimizers.sgd import optimize_sgd
-from platform.optimizers.genetic import optimize_ga
+from platform.optimizers.genetic import optimize_ga, optimize_es_recurrent
+from platform.optimizers.evolution import optimize_ga_feedforward, optimize_es_feedforward
 
 
 def set_random_seeds(seed: int) -> None:
@@ -81,13 +83,13 @@ def load_data(dataset: str, use_cl_info: bool, subject: str = "sub01", holdout_p
 
 def create_model(model_type: str, input_size: int, hidden_size: int, output_size: int):
     """Create model based on type.
-    
+
     Args:
-        model_type: Model type (reservoir, trainable)
+        model_type: Model type (reservoir, trainable, mlp)
         input_size: Input dimension
         hidden_size: Hidden dimension
         output_size: Output dimension
-        
+
     Returns:
         Model instance
     """
@@ -95,6 +97,8 @@ def create_model(model_type: str, input_size: int, hidden_size: int, output_size
         return RecurrentMLPReservoir(input_size, hidden_size, output_size)
     elif model_type == "trainable":
         return RecurrentMLPTrainable(input_size, hidden_size, output_size)
+    elif model_type == "mlp":
+        return MLP(input_size, hidden_size, output_size)
     else:
         raise ValueError(f"Unknown model type: {model_type}")
 
@@ -154,12 +158,12 @@ def run_experiment(
     
     print(f"Input size: {input_size}, Output size: {output_size}")
     print(f"Optim size: {optim_obs.shape[0]}, Test size: {test_obs.shape[0]}")
-    
+
     # Create checkpoint path
     cl_suffix = "with_cl" if use_cl_info else "no_cl"
     method_full = f"{method}_{cl_suffix}"
     checkpoint_path = RESULTS_DIR / f"{dataset}_{method_full}_{subject}_checkpoint.pt"
-    
+
     # Run optimizer
     if optimizer_type == "sgd":
         # Create model
@@ -182,23 +186,115 @@ def run_experiment(
         )
         
     elif optimizer_type == "ga":
-        # Run GA optimization
-        fitness_history, test_loss_history = optimize_ga(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            output_size=output_size,
-            optim_obs=optim_obs,
-            optim_act=optim_act,
-            test_obs=test_obs,
-            test_act=test_act,
-            metadata=metadata,
-            checkpoint_path=checkpoint_path,
-            model_type=model_type,
-            max_optim_time=max_optim_time,
-            population_size=population_size,
-            logger=logger,
-        )
-        
+        # Run GA optimization (dispatch based on model type)
+        if model_type == "mlp":
+            # Feedforward GA
+            fitness_history, test_loss_history = optimize_ga_feedforward(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                output_size=output_size,
+                optim_obs=optim_obs,
+                optim_act=optim_act,
+                test_obs=test_obs,
+                test_act=test_act,
+                metadata=metadata,
+                checkpoint_path=checkpoint_path,
+                max_optim_time=max_optim_time,
+                population_size=population_size,
+                logger=logger,
+            )
+        else:  # reservoir or trainable
+            # Recurrent GA
+            fitness_history, test_loss_history = optimize_ga(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                output_size=output_size,
+                optim_obs=optim_obs,
+                optim_act=optim_act,
+                test_obs=test_obs,
+                test_act=test_act,
+                metadata=metadata,
+                checkpoint_path=checkpoint_path,
+                model_type=model_type,
+                max_optim_time=max_optim_time,
+                population_size=population_size,
+                logger=logger,
+            )
+
+    elif optimizer_type == "es":
+        # Run ES optimization (feedforward or recurrent)
+        if model_type == "mlp":
+            # Feedforward ES
+            fitness_history, test_loss_history = optimize_es_feedforward(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                output_size=output_size,
+                optim_obs=optim_obs,
+                optim_act=optim_act,
+                test_obs=test_obs,
+                test_act=test_act,
+                metadata=metadata,
+                checkpoint_path=checkpoint_path,
+                max_optim_time=max_optim_time,
+                population_size=population_size,
+                logger=logger,
+            )
+        else:  # reservoir or trainable
+            # Recurrent ES
+            fitness_history, test_loss_history = optimize_es_recurrent(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                output_size=output_size,
+                optim_obs=optim_obs,
+                optim_act=optim_act,
+                test_obs=test_obs,
+                test_act=test_act,
+                metadata=metadata,
+                checkpoint_path=checkpoint_path,
+                model_type=model_type,
+                max_optim_time=max_optim_time,
+                population_size=population_size,
+                logger=logger,
+            )
+
+    elif optimizer_type == "cmaes":
+        # Run CMA-ES optimization (dispatch based on model type)
+        if model_type == "mlp":
+            # Feedforward CMA-ES
+            from platform.optimizers.evolution import optimize_cmaes_feedforward
+            fitness_history, test_loss_history = optimize_cmaes_feedforward(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                output_size=output_size,
+                optim_obs=optim_obs,
+                optim_act=optim_act,
+                test_obs=test_obs,
+                test_act=test_act,
+                metadata=metadata,
+                checkpoint_path=checkpoint_path,
+                max_optim_time=max_optim_time,
+                population_size=population_size,
+                logger=logger,
+            )
+        else:  # reservoir or trainable
+            # Recurrent CMA-ES
+            from platform.optimizers.genetic import optimize_cmaes_recurrent
+            fitness_history, test_loss_history = optimize_cmaes_recurrent(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                output_size=output_size,
+                optim_obs=optim_obs,
+                optim_act=optim_act,
+                test_obs=test_obs,
+                test_act=test_act,
+                metadata=metadata,
+                checkpoint_path=checkpoint_path,
+                model_type=model_type,
+                max_optim_time=max_optim_time,
+                population_size=population_size,
+                logger=logger,
+            )
+
     else:
         raise ValueError(f"Unknown optimizer type: {optimizer_type}")
     
@@ -230,16 +326,16 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        choices=["reservoir", "trainable"],
+        choices=["reservoir", "trainable", "mlp"],
         required=True,
-        help="Model type: reservoir (frozen) or trainable (rank-1)",
+        help="Model type: reservoir (frozen recurrent), trainable (rank-1 recurrent), or mlp (feedforward)",
     )
     parser.add_argument(
         "--optimizer",
         type=str,
-        choices=["sgd", "ga"],
+        choices=["sgd", "ga", "es", "cmaes"],
         required=True,
-        help="Optimizer: sgd or ga",
+        help="Optimizer: sgd, ga, es, or cmaes (all work with any model type)",
     )
     
     # Optional arguments
