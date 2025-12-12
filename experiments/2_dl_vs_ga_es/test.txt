@@ -1,3 +1,0 @@
-python -u -m experiments.2_dl_vs_ga_es.main --dataset cartpole --method SGD --dataset-size 100000 --gpu 0
-python -u -m experiments.2_dl_vs_ga_es.main --dataset cartpole --method simple_ga_fixed_CE --dataset-size 100000 --gpu 0
-python -u -m experiments.2_dl_vs_ga_es.main --dataset cartpole --method simple_ga_fixed_F1 --dataset-size 100000 --gpu 0

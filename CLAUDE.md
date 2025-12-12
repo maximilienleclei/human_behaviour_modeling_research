@@ -8,5 +8,3 @@ Every `.py` file over 30 lines must have an equivalent `.md` file with a high-le
 Also make sure that you utilize that functionality. There are times where reading the `.md` files are sufficient and you do not need to load their corresponding `.py` files into context.
 
 When starting a new session, always read `@README.md`, it indexes other useful `.md` files in `docs/`. Make sure you read these if they look pertinent, and also make sure to keep them up to date when you make modifications to the codebase.
-
---time=00:30:00 --gpus=h100_1g.10gb:1 --account=rrg-pbellec --mem=15G --cpus-per-task=2
