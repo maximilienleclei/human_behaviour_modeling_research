@@ -1,3 +1,4 @@
-ai_repo/
-claude_repo/
-data/sets/simexp_control_tasks/*.json
+data/simexp_control_tasks/*.json
+exca/
+__pycache__/
+results/
