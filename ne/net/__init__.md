@@ -4,8 +4,14 @@ Batched network implementations for efficient GPU-parallel evolutionary optimiza
 
 ## Files
 
+### Protocol Definitions
+- **protocol.py** - Protocol interfaces for network types using structural subtyping
+  - NetworkProtocol: Base protocol for all networks
+  - ParameterizableNetwork: For ES/CMA-ES compatible networks (feedforward, recurrent)
+  - StructuralNetwork: For topology-evolving networks (dynamic)
+
 ### Feedforward Networks
-- **feedforward.py** - BatchedFeedforward: Two-layer MLP population with batched parameters and adaptive sigma mutation
+- **feedforward.py** - BatchedFeedforward: Multi-layer MLP population with batched parameters and adaptive sigma mutation
 
 ### Recurrent Networks
 - **recurrent.py** - BatchedRecurrent: Recurrent MLP population supporting both frozen reservoir and trainable rank-1 recurrent weights
@@ -15,4 +21,4 @@ Batched network implementations for efficient GPU-parallel evolutionary optimiza
 
 ## Design
 
-All classes store num_nets networks as batched tensors for parallel forward passes and mutations. Network-specific computation only - evaluation, selection, and optimization loops belong in ne/pop/ and ne/optim/.
+All classes store num_nets networks as batched tensors for parallel forward passes and mutations. Network-specific computation only - evaluation, selection, and optimization loops belong in ne/pop/ and ne/optim/. Networks implement protocol interfaces for clean integration with Population adapter and optimizers.

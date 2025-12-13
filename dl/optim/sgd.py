@@ -14,7 +14,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 
 from config.device import DEVICE
-from dl.data.preprocessing import EpisodeDataset, episode_collate_fn
+from data.process.preprocessing import EpisodeDataset, episode_collate_fn
 from dl.optim.base import create_episode_list
 
 

@@ -1,15 +1,15 @@
-# Platform Optimizers Directory
+# Deep Learning Optimizers Directory
 
-Optimization methods for training behavior models, including gradient-based (SGD) and gradient-free (GA, ES, CMA-ES) approaches.
+Gradient-based optimization methods for training behavior models.
 
 ## Overview
 
-This directory implements all optimization algorithms used to fit models to human behavioral data. Optimizers handle both feedforward and recurrent architectures with efficient GPU-parallel computation for evolutionary methods.
+This directory implements deep learning optimization algorithms used to fit neural network models to human behavioral data using gradient descent and backpropagation.
 
 ## Files
 
 ### Shared Utilities
-- **base.py** - Common functions used across all optimizers
+- **base.py** - Common functions used across optimizers
   - `create_episode_list()` - Converts flat data to episode structure
   - `save_checkpoint()` / `load_checkpoint()` - Checkpoint management
 
@@ -18,31 +18,16 @@ This directory implements all optimization algorithms used to fit models to huma
   - `optimize_sgd()` - Main SGD training loop
   - Supports both feedforward and recurrent models
   - Episode-based batching for recurrent architectures
-
-### Evolutionary Optimization - Feedforward
-- **evolution.py** - GA/ES/CMA-ES for feedforward networks
-  - `BatchedPopulation` - GPU-batched population for Simple GA/ES
-  - `CMAESPopulation` - Diagonal CMA-ES population
-  - `optimize_ga_feedforward()` - Simple Genetic Algorithm
-  - `optimize_es_feedforward()` - Evolution Strategy
-  - `optimize_cmaes_feedforward()` - CMA-ES
-
-### Evolutionary Optimization - Recurrent
-- **genetic.py** - GA/ES/CMA-ES for recurrent networks
-  - `BatchedRecurrentPopulation` - GPU-batched recurrent population
-  - `CMAESRecurrentPopulation` - Diagonal CMA-ES for recurrent nets
-  - `optimize_ga()` - Simple GA for recurrent models
-  - `optimize_es_recurrent()` - ES for recurrent models
-  - `optimize_cmaes_recurrent()` - CMA-ES for recurrent models
+  - Periodic evaluation and checkpointing
 
 ## Key Concepts
 
-**Gradient-Free Methods**: Evolutionary algorithms that work by mutating population parameters and selecting based on fitness, no backpropagation required.
+**Gradient Descent**: Optimization via backpropagation, computing gradients of loss with respect to parameters and updating in direction that reduces loss.
 
-**Batched Populations**: All networks in population stored as batched tensors for parallel GPU evaluation, dramatically faster than sequential evaluation.
+**Episode Batching**: For recurrent models, episodes are batched together with padding to handle variable lengths while preserving temporal structure.
 
-**Adaptive Sigma**: Per-parameter mutation strengths that co-evolve with the parameters themselves.
+**Checkpointing**: Model state, optimizer state, and training history saved periodically for resumption.
 
 ## Usage
 
-Optimizers are selected automatically by platform/runner.py based on method name patterns (SGD vs GA vs ES).
+The SGD optimizer is used for supervised learning where gradient information is available. For evolutionary optimization (GA, ES, CMA-ES), see the `ne/optim/` module which provides unified gradient-free optimization algorithms.

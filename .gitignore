@@ -1,4 +1,4 @@
-data/simexp_control_tasks/*.json
+data/simexp_control_tasks/source/*.json
 exca/
 __pycache__/
 results/

@@ -2,14 +2,12 @@
 
 Centralizes all configuration schemas:
 - device: DEVICE and set_device()
-- environments: ENV_CONFIGS and environment utilities
 - paths: Project directory paths
 - state: State persistence configuration
 - experiments: Experiment configuration dataclasses
 """
 
 from config.device import DEVICE, set_device
-from config.environments import ENV_CONFIGS, get_data_file
 from config.experiments import (
     DataConfig,
     ExperimentConfig,
@@ -24,9 +22,6 @@ __all__ = [
     # Device
     "DEVICE",
     "set_device",
-    # Environments
-    "ENV_CONFIGS",
-    "get_data_file",
     # Paths
     "DATA_DIR",
     "PROJECT_ROOT",

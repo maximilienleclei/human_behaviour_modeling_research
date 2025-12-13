@@ -1,6 +1,6 @@
-# Platform Evaluation Directory
+# Metrics Module
 
-Metrics and behavioral comparison functions for evaluating model performance.
+Shared evaluation metrics and behavioral comparison functions used across both deep learning (dl/) and neuroevolution (ne/) modules.
 
 ## Overview
 
@@ -17,7 +17,6 @@ This directory provides evaluation functions for quantifying how well models mat
 ### Behavioral Comparison
 - **comparison.py** - Compare model vs human behavior in environment
   - `evaluate_progression_recurrent()` - Run model on matched episodes, compare returns
-  - `create_episode_list()` - Convert flat data to episode structure
   - Uses episode seeds from human data for matched comparison
 
 ## Evaluation Philosophy
@@ -30,4 +29,4 @@ The first measures action-level imitation, the second measures outcome-level sim
 
 ## Usage
 
-Metrics are called periodically during optimization (platform/optimizers/) to log training progress. Behavioral comparison runs less frequently due to computational cost of environment rollouts.
+Metrics are called periodically during optimization to log training progress. Behavioral comparison runs less frequently due to computational cost of environment rollouts.

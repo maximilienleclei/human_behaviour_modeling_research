@@ -7,7 +7,6 @@ Centralizes all experiment configuration to avoid code duplication between dl/ a
 
 ## Contents
 - `device.py` - Global DEVICE variable and device management
-- `environments.py` - Environment configurations for different control tasks
 - `paths.py` - Project-wide directory paths
 - `state.py` - State persistence configuration for continual learning
 - `experiments.py` - Experiment configuration dataclasses (model, optimizer, training, data configs)
