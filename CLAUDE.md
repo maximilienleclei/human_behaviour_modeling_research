@@ -4,8 +4,6 @@ CRITICAL PATH REMINDER:
 - ALWAYS copy paths exactly from Glob/Bash output - NEVER type them manually
 - If you see a path error, check character-by-character that you copied it exactly
 
-You have a tendency to write my name as maximilian instead of maximilien in certain commands, which messes up your file reading, beware!
-
 In plan mode, make sure to dump your plan to a file in the repository in case we run out of context/usage. Delete it once the plan has been implemented. Also write down progress checks so that we know what you already did and what is left to do.
 
 Do not ever worry about backwards compatibility, I would always rather simplify and clean things up to build better than stay attached to older code.
